@@ -86,7 +86,7 @@ end
 maxDev = max( abs( dev ) );
 
 % Get the percent of the maximum deviation associated with each limit
-percDev = dev ./ maxDev;
+percDev = abs(dev) ./ maxDev;
 
 % Get the number of color points on each half of the colormap
 halfStep = floor( size(cmap,1) / 2 );
@@ -162,10 +162,10 @@ if isempty(clim)
         
         % If the axes limits are greater / smaller than the current color
         % limits, update the color limits
-        if axclim(1) < clim
+        if axclim(1) < clim(1)
             clim(1) = axclim(1);
         end
-        if axclim(2) > clim
+        if axclim(2) > clim(2)
             clim(2) = axclim(2);
         end
     end
