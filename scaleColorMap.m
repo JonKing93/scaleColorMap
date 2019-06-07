@@ -91,11 +91,11 @@ percDev = dev ./ maxDev;
 % Get the number of color points on each half of the colormap
 halfStep = floor( size(cmap,1) / 2 );
 
-% Trim the bottom (maximum values) of the colormap
+% Trim the second half (maximum values) of the colormap
 nTrim = halfStep - round( percDev(2)*halfStep );
 cmap( end-nTrim+1:end, : ) = [];
 
-% Trim the top (minimum values) of the colormap
+% Trim the first half (minimum values) of the colormap
 nTrim = halfStep - round( percDev(1)*halfStep );
 cmap( 1:nTrim, : ) = [];
 
