@@ -135,7 +135,9 @@ if ~isscalar(x0) || ~isnumeric(x0) || ~isreal(x0)
 end
 
 % Check that ax is a set of axes
-if ~isa(ax, 'matlab.graphics.axis.Axes')
+if isempty(ax)
+    ax = gca;
+elseif ~isa(ax, 'matlab.graphics.axis.Axes')
     error('ax must be a set of axes handles.');
 end
 
