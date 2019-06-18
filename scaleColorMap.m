@@ -15,13 +15,14 @@ function[varargout] = scaleColorMap( cmap, x0, ax, clim, setVals )
 % scaleColorMap( cmap, x0, ax, clim )
 % Scales a colormap to match the specified color limits. If the centering
 % value is not within the color limits, expands the color limits to include
-% the centering value.
+% the centering value. Use clim = [] to scale the colormap to the minimum
+% and maximum values in the set of specified axes.
 %
 % cmap = scaleColorMap( ... )
 % Returns the scaled colormap.
 %
 % cmap = scaleColorMap( cmap, x0, ax, clim, setVals )
-% Specifies whether to cahnge the colormap and color limits of the relevant
+% Specifies whether to change the colormap and color limits of the relevant
 % axes. By default, setVals = true, change it to false to leave the axes
 % unaltered.
 %
@@ -97,7 +98,6 @@ cmap( end-nTrim+1:end, : ) = [];
 % Trim the first half (minimum values) of the colormap
 nTrim = halfStep - round( percDev(1)*halfStep );
 cmap( 1:nTrim, : ) = [];
-
 
 
 % Set the values on the axes if desired
