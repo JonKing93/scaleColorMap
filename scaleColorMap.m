@@ -62,8 +62,7 @@ if ~exist('setVals','var')
 end
 
 % Do some error checking and get the color limits
-[clim] = setup( cmap, x0, ax, clim, setVals, nargout );
-
+[clim, ax] = setup( cmap, x0, ax, clim, setVals, nargout );
 
 
 % Get the deviation of each color limit from the centering value
@@ -118,7 +117,7 @@ end
 end
 
 %% Helper function to do error checking and get the color limits
-function[clim] = setup( cmap, x0, ax, clim, setVals, nOut )
+function[clim, ax] = setup( cmap, x0, ax, clim, setVals, nOut )
 
 % Check that the colormap is allowed
 if ~ismatrix(cmap) || size(cmap,2)~=3 || ~isnumeric(cmap) || ~isreal(cmap)
