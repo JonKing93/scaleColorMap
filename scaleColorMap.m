@@ -73,7 +73,7 @@ dev = clim - x0;
 if all(dev > 0) || all(dev < 0)
     
     % Get the color limit that is closest to the centering value
-    closeLim = find( abs(clim)==min(abs(clim)) );
+    closeLim = find( abs(dev)==min(abs(dev)) );
     
     % Change this color limit to the centering value
     clim( closeLim ) = x0;
