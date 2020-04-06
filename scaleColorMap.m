@@ -103,8 +103,8 @@ cmap( 1:nTrim, : ) = [];
 % Set the values on the axes if desired
 if setVals
     for a = 1:numel(ax)
-        set( ax(a), 'clim', clim );
-        set( ax(a), 'Colormap', cmap );
+        caxis( ax(a), clim );
+        colormap( ax(a), cmap );
     end
 end
 
