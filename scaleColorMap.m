@@ -10,13 +10,16 @@ function[varargout] = scaleColorMap( cmap, x0, ax, clim, setVals )
 % scaleColorMap( cmap, x0, ax )
 % Operates on the specified axes. If multiple axes are specified, scales
 % the color map to the minimum color limit and maximum color limit of the
-% entire set of axes. Use ax = [] to operate on the current axis. 
+% entire set of axes. If ax = [], operates on the current axis. 
 %
 % scaleColorMap( cmap, x0, ax, clim )
 % Scales a colormap to match the specified color limits. If the centering
 % value is not within the color limits, expands the color limits to include
-% the centering value. Use clim = [] to scale the colormap to the minimum
-% and maximum values in the set of specified axes.
+% the centering value. If clim = [], scales the colormap to the minimum
+% and maximum values in the set of specified axes. Use NaN to manually set
+% one limit, and automatically scale the other. For example, clim = [NaN, 2]
+% sets the upper color limit to 2 and the lower color limit to the minimum
+% value in the set of axes.
 %
 % cmap = scaleColorMap( ... )
 % Returns the scaled colormap.
@@ -38,7 +41,9 @@ function[varargout] = scaleColorMap( cmap, x0, ax, clim, setVals )
 % ax: A set of axes handles.
 %
 % clim: User-specified color limits. A 2 element vector of real numbers
-%       whose first element is smaller than the second element. (2 x 1) or (1 x 2)
+%       whose first element is smaller than the second element. Use NaN
+%       and a number to manually set one limit, but automatically set the
+%       other. (1 x 2)
 %
 % setVals: A scalar logical. True or False. (1 x 1)
 %
@@ -65,42 +70,33 @@ end
 % Do some error checking and get the color limits
 [clim, ax] = setup( cmap, x0, ax, clim, setVals, nargout );
 
-
 % Get the deviation of each color limit from the centering value
 dev = clim - x0;
 
-% If the centering value is not within the color limits
-if all(dev > 0) || all(dev < 0)
-    
-    % Get the color limit that is closest to the centering value
-    closeLim = find( abs(dev)==min(abs(dev)) );
-    
-    % Change this color limit to the centering value
-    clim( closeLim ) = x0;
-    
-    % Update the deviation
+% If the center is outside the color limits, find the closest color limit
+% and change the centering value to that limit
+if all(dev > 0) || all(dev < 0)    
+    closeLim = find( abs(dev)==min(abs(dev)) );    
+    clim( closeLim ) = x0;    
     dev( closeLim ) = 0;
 end
 
-% Get the maximum absolute deviation from the centering value
+% Get the maximum absolute deviation from the center and the percent max
+% deviation associated with each color limit
 maxDev = max( abs( dev ) );
-
-% Get the percent of the maximum deviation associated with each limit
 percDev = abs(dev) ./ maxDev;
 
-% Get the number of color points on each half of the colormap
+% Get the number of color points on each half of the colormap. Trim each
+% half a percent of color points matching the percent max deviation
 halfStep = floor( size(cmap,1) / 2 );
 
-% Trim the second half (maximum values) of the colormap
 nTrim = halfStep - round( percDev(2)*halfStep );
 cmap( end-nTrim+1:end, : ) = [];
 
-% Trim the first half (minimum values) of the colormap
 nTrim = halfStep - round( percDev(1)*halfStep );
 cmap( 1:nTrim, : ) = [];
 
-
-% Set the values on the axes if desired
+% Optionally set the values on the axis
 if setVals
     for a = 1:numel(ax)
         caxis( ax(a), clim );
@@ -108,7 +104,7 @@ if setVals
     end
 end
 
-% Return the colormap if desired as output
+% Return the colormap if requested as output
 varargout = {};
 if nargout == 1
     varargout = {cmap};
@@ -140,19 +136,45 @@ elseif ~isa(ax, 'matlab.graphics.axis.Axes')
     error('ax must be a set of axes handles.');
 end
 
-% If the color limits are not specified
+% If color limits are unspecified, automatically determine both
 if isempty(clim)
+    setUpper = true;
+    setLower = true;
+
+% Otherwise, error check user color limits
+else
+    if ~isvector(clim) || numel(clim)~=2 || ~isnumeric(clim) || ~isreal(clim)
+        error('clim must be a 2 element vector of real, numeric values.');
+    elseif any( isinf(clim) )
+        error('clim cannot be infinite.');
+    elseif clim(1)>=clim(2)
+        error('The first element in clim must be smaller than the second element of clim.');
+    end
     
-    % Initialize the color limits
-    clim = [Inf, -Inf];
-    
-    % For each axes handle
+    % Check to determine any color limits automatically
+    if isnan(clim(1))
+        setLower = true;
+    end
+    if isnan(clim(2))
+        setUpper = true;
+    end
+end
+
+% Initialize unset color limits
+if setLower
+    clim(1) = Inf;
+end
+if setUpper
+    clim(2) = -Inf;
+end
+
+% If setting color limits, cycle through the axes and find the min and/or
+% max values
+if any(isinf(clim))
     for a = 1:numel(ax)
-        
-        % Get the color limit on this axis
         axclim = get(ax(a), 'clim');
         
-        % Ensure that the color limits are finite
+        % Ensure color limits are finite
         if any(isinf(axclim))
             axStr = sprintf('Axis %.f', a);
             if isequal( ax(a), gca )
@@ -161,26 +183,13 @@ if isempty(clim)
             error('%s has infinite color limits. Please set them to finite values.', axStr);
         end
         
-        % If the axes limits are greater / smaller than the current color
-        % limits, update the color limits
-        if axclim(1) < clim(1)
+        % Update the color limit if the limit for the axis is smaller/larger
+        if setLower && axclim(1)<clim(1)
             clim(1) = axclim(1);
         end
-        if axclim(2) > clim(2)
+        if setUpper && axclim(2)>clim(2)
             clim(2) = axclim(2);
         end
-    end
-    
-% Otherwise, error check user-specified color limits
-else
-    if ~isvector(clim) || numel(clim)~=2 || ~isnumeric(clim) || ~isreal(clim)
-        error('clim must be a 2 element vector of real, numeric values.');
-    elseif any(isnan(clim))
-        error('clim cannot contain NaN.');
-    elseif any( isinf(clim) )
-        error('clim cannot be infinite.');
-    elseif clim(1)>=clim(2)
-        error('The first element in clim must be smaller than the second element of clim.');
     end
 end
 
