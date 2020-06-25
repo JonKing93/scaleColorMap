@@ -152,6 +152,8 @@ else
     end
     
     % Check to determine any color limits automatically
+    setLower = false;
+    setUpper = false;
     if isnan(clim(1))
         setLower = true;
     end
