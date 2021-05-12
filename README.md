@@ -1,6 +1,9 @@
 # scaleColorMap
 Scales a colormap for diverging data sets.
 
+### Setup
+To use, download this repository and add it to the Matlab active path.
+
 ### Usage
 Please see the demo (located in "Demo/demo_scaleColorMap.m") for detailed instructions on using this function. The basic syntax is:
 
