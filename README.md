@@ -1,5 +1,5 @@
 # scaleColorMap
-Scales a colormap for diverging data sets.
+Scales a colormap for diverging data sets. Sets the midpoint of the colormap to a divergence point and scales colorbar colors to the magnitudes of the data limits.
 
 ### Setup
 To use, download this repository and add it to the Matlab active path.
